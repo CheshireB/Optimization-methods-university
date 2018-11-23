@@ -11,4 +11,4 @@ for i in matrix.getA():
 
 print(len(matrix))
 
-print(matrix)
+print(matrix[-1, 0])

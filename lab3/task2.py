@@ -110,29 +110,50 @@ def get_ids_min(C):
 
 def find(i, j):
     path = [[i, j]]
-    find_v(path, i, j, i, j)
+
+    path = find_vertical(path, i, j, i, j)
+    if not path: path = find_vertical(path, i, j, i, j)
+
     return path
 
 
-def find_h(path, i, j, i0, j0):
-    for maybe in range(size_b):
-        if (maybe != j and matrix_nw[i, maybe] != 0):
-            if find_v(path, i, maybe, i0, j0):
-                path += [[i, maybe]]
-                return True
-    return False
+def find_horizontal(path, i, j, i0, j0):
+
+    for id_new_column in [j-1, j+1]:
+
+        if j == i0 and id_new_column == j0:
+            path.append([i, id_new_column])
+            return path
+
+        if not id_new_column < 0 and size_b > id_new_column \
+                and matrix_potential[i, id_new_column] == 0:
+
+            path = find_vertical(path, i, id_new_column, i0, j0)
+            if path:
+                path.append(j, id_new_column)
+                return path
+
+    return None
 
 
-def find_v(path, i, j, i0, j0):
-    for maybe in range(size_a):
-        if (maybe != i and matrix_nw[maybe, j] != 0):
-            if (maybe == i0):
-                path += [[maybe, j]]
-                return True
-            if find_h(path, maybe, j, i0, j0):
-                path += [[maybe, j]]
-                return True
-    return False
+def find_vertical(path, i, j, i0, j0):
+
+    for id_new_row in [i-1, i+1]:
+
+        if id_new_row == i0 and j == j0:
+            path.append([id_new_row, j])
+            return path
+
+        if not id_new_row < 0 and size_a > id_new_row \
+                and matrix_potential[id_new_row, j] == 0:
+
+            path = find_horizontal(path, id_new_row, j, i0, j0)
+            if path:
+                path.append(id_new_row, j)
+                return path
+
+    return None
+
 
 
 A = [40, 30, 30]
@@ -145,17 +166,17 @@ size_a = len(A)
 size_b = len(B)
 
 # get basic solution
-matrix_nw = get_matrix_nw(A, B)
+matrix = get_matrix_nw(A, B)
 
 # exclude degenerated matrix
-while check_on_degenerate(matrix_nw):
-    matrix_nw = get_matrix_nw_with_additional_cell(matrix_nw)
+while check_on_degenerate(matrix):
+    matrix = get_matrix_nw_with_additional_cell(matrix)
 
 # calculate potential
-U, V = get_potential(C, matrix_nw)
+U, V = get_potential(C, matrix)
 
 # calculate potential solution
-matrix_potential = get_matrix_potential_solution(matrix_nw, U, V, C)
+matrix_potential = get_matrix_potential_solution(matrix, U, V, C)
 
 # get potential minimum
 ids_min = get_ids_min(matrix_potential)
